@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+  # === PostgreSQL for OrderService ===
+  postgres-order:
+    image: postgres:16
+    container_name: postgres-order
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ordersdb
+    ports:
+      - "5433:5432"   # host:container
+    volumes:
+      - postgres_order_data:/var/lib/postgresql/data
+
+  # === RabbitMQ ===
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"   # broker port
+      - "15672:15672" # management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  # === OrderService ===
+  order-service:
+    build: ./OrderService   # path to your OrderService folder
+    container_name: order-service
+    depends_on:
+      - postgres-order
+      - rabbitmq
+    environment:
+      ConnectionStrings__Default: "Host=postgres-order;Port=5432;Database=ordersdb;Username=postgres;Password=postgres"
+      RabbitMQ__Host: "rabbitmq"
+    ports:
+      - "5001:80"   # host:container (your API on http://localhost:5001)
+
+volumes:
+  postgres_order_data:
+  rabbitmq_data:

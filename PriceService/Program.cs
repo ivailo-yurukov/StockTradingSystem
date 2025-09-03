@@ -1,7 +1,5 @@
 using MassTransit;
-using Microsoft.EntityFrameworkCore;
-using PortfolioService.Data;
-using PortfolioService.Services;
+using PriceService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,14 +9,9 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.Services.AddDbContext<PortfolioDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
-
+// MassTransit with RabbitMQ
 builder.Services.AddMassTransit(x =>
 {
-    x.AddConsumer<OrderExecutedConsumer>();
-    x.AddConsumer<PriceUpdatedConsumer>();
-
     x.UsingRabbitMq((context, cfg) =>
     {
         cfg.Host(builder.Configuration["RabbitMQ:Host"], "/", h =>
@@ -26,24 +19,13 @@ builder.Services.AddMassTransit(x =>
             h.Username("guest");
             h.Password("guest");
         });
-
-        cfg.ReceiveEndpoint("portfolio-service", e =>
-        {
-            e.ConfigureConsumer<OrderExecutedConsumer>(context);
-            e.ConfigureConsumer<PriceUpdatedConsumer>(context);
-        });
     });
 });
+
+builder.Services.AddHostedService<PriceGenerator>();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
-// Auto apply migrations
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<PortfolioDbContext>();
-    db.Database.Migrate();
-}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

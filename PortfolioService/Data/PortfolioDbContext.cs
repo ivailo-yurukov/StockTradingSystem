@@ -9,5 +9,6 @@ namespace PortfolioService.Data
         public PortfolioDbContext(DbContextOptions<PortfolioDbContext> options) : base(options) { }
 
         public DbSet<Holding> Holdings { get; set; }
+        public DbSet<Price> Prices { get; set; }
     }
 }

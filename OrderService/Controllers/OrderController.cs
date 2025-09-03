@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OrderService.Models;
 using OrderService.Services;
+using System.Threading.Tasks;
 
 namespace OrderService.Controllers
 {
@@ -17,13 +18,19 @@ namespace OrderService.Controllers
         }
 
         [HttpPost("add/{userId}")]
-        public IActionResult AddOrder(string userId, [FromBody] Order request)
+        public async Task<IActionResult> AddOrder(string userId, [FromBody] OrderRequest request)
         {
+            var order = new Order
+            {
+                UserId = userId,
+                Ticker = request.Ticker,
+                Quantity = request.Quantity,
+                Side = request.Side
+            };
             // TODO: Get latest price from PriceService (cache/event-based)
             decimal currentPrice = 100m; // placeholder for now
 
-            request.UserId = userId;
-            var executedEvent = _orderProcessor.ProcessOrderAsync(request, currentPrice);
+            var executedEvent = await _orderProcessor.ProcessOrderAsync(order, currentPrice);
 
             return Ok(executedEvent);
         }

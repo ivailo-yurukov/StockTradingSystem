@@ -34,6 +34,7 @@ services:
     environment:
       ConnectionStrings__Default: "Host=postgres-order;Port=5432;Database=ordersdb;Username=postgres;Password=postgres"
       RabbitMQ__Host: "rabbitmq"
+      ASPNETCORE_URLS: "http://+:80"
     ports:
       - "5001:80"   # host:container (your API on http://localhost:5001)
 

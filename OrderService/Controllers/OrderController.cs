@@ -15,7 +15,7 @@ namespace OrderService.Controllers
         private readonly IOrderProcessor _orderProcessor;
         private readonly PriceCache _priceCache;
 
-        public OrderController(OrderProcessor orderProcessor, PriceCache priceCache)
+        public OrderController(IOrderProcessor orderProcessor, PriceCache priceCache)
         {
             _orderProcessor = orderProcessor;
             _priceCache = priceCache;

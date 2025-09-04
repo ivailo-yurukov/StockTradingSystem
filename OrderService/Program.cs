@@ -2,6 +2,7 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using OrderService.Data;
 using OrderService.Interfaces;
+using OrderService.Middleware;
 using OrderService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,7 @@ builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
 builder.Services.AddScoped<IOrderProcessor, OrderProcessor>();
+builder.Services.AddSingleton<PriceCache>();
 builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<PriceUpdatedConsumer>();
@@ -37,6 +39,8 @@ builder.Services.AddMassTransit(x =>
 
 builder.Services.AddSwaggerGen();
 var app = builder.Build();
+
+app.UseGlobalExceptionHandling();
 
 using (var scope = app.Services.CreateScope())
 {

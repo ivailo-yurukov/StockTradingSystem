@@ -1,6 +1,7 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using OrderService.Data;
+using OrderService.Interfaces;
 using OrderService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,15 +15,22 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
-builder.Services.AddScoped<OrderProcessor>();
+builder.Services.AddScoped<IOrderProcessor, OrderProcessor>();
 builder.Services.AddMassTransit(x =>
 {
+    x.AddConsumer<PriceUpdatedConsumer>();
+
     x.UsingRabbitMq((context, cfg) =>
     {
         cfg.Host(builder.Configuration["RabbitMQ:Host"], "/", h =>
         {
             h.Username("guest");
             h.Password("guest");
+        });
+
+        cfg.ReceiveEndpoint("order-service", e =>
+        {
+            e.ConfigureConsumer<PriceUpdatedConsumer>(context);
         });
     });
 });

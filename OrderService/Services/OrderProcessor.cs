@@ -1,11 +1,12 @@
 ﻿using MassTransit;
 using OrderService.Data;
 using OrderService.Events;
+using OrderService.Interfaces;
 using OrderService.Models;
 
 namespace OrderService.Services
 {
-    public class OrderProcessor
+    public class OrderProcessor : IOrderProcessor
     {
         private readonly OrderDbContext _dbContext;
         private readonly IPublishEndpoint _publishEndpoint;

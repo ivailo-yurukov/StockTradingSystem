@@ -33,7 +33,7 @@ namespace PriceService.Services
                     Console.WriteLine($"[PriceService] Published {ticker} at {priceUpdate.Price}");
                 }
 
-                await Task.Delay(1000, stoppingToken); 
+                await Task.Delay(10000, stoppingToken); 
             }
         }
     }

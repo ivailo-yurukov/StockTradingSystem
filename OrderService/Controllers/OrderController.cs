@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using OrderService.Interfaces;
 using OrderService.Models;
 using OrderService.Services;
+using System;
 using System.Threading.Tasks;
 
 namespace OrderService.Controllers
@@ -10,11 +12,13 @@ namespace OrderService.Controllers
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly OrderProcessor _orderProcessor;
+        private readonly IOrderProcessor _orderProcessor;
+        private readonly PriceCache _priceCache;
 
-        public OrderController(OrderProcessor orderProcessor)
+        public OrderController(OrderProcessor orderProcessor, PriceCache priceCache)
         {
             _orderProcessor = orderProcessor;
+            _priceCache = priceCache;
         }
 
         [HttpPost("add/{userId}")]
@@ -27,8 +31,12 @@ namespace OrderService.Controllers
                 Quantity = request.Quantity,
                 Side = request.Side
             };
-            // TODO: Get latest price from PriceService (cache/event-based)
-            decimal currentPrice = 100m; // placeholder for now
+
+            decimal currentPrice = _priceCache.GetPrice(order.Ticker);
+            if (currentPrice == 0m)
+            {
+                return BadRequest($"No price available for {order.Ticker} yet.");
+            }
 
             var executedEvent = await _orderProcessor.ProcessOrderAsync(order, currentPrice);
 

@@ -73,7 +73,20 @@ services:
       RabbitMQ__Host: "rabbitmq"
       ASPNETCORE_URLS: "http://+:80"
     ports:
-      - "5003:80"   # http://localhost:5003 (optional, for logs/health)
+      - "5003:80"   # http://localhost:5003
+
+  # === API Gateway ===
+  api-gateway-service:
+    build: ./ApiGatewayService   # path to your ApiGatewayService project
+    container_name: api-gateway-service
+    depends_on:
+      - order-service
+      - portfolio-service
+      - price-service
+    environment:
+      ASPNETCORE_URLS: "http://+:80"
+    ports:
+      - "5000:80"   # Gateway exposed on http://localhost:5000
 
 volumes:
   postgres_order_data:

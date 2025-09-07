@@ -7,13 +7,16 @@ namespace OrderService.Services
         private readonly ConcurrentDictionary<string, decimal> _prices = new();
 
         public void UpdatePrice(string ticker, decimal price)
-        {
-            _prices[ticker] = price;
+        { 
+            var key = (ticker ?? string.Empty).Trim().ToUpperInvariant();
+            _prices[key] = price;
+            Console.WriteLine($"[PriceCache] Updated {key} => {price}");
         }
 
         public decimal GetPrice(string ticker)
         {
-            return _prices.TryGetValue(ticker, out var price) ? price : 0m;
+            var key = (ticker ?? string.Empty).Trim().ToUpperInvariant();
+            return _prices.TryGetValue(key, out var price) ? price : 0m;
         }
     }
 }

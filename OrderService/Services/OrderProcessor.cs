@@ -46,7 +46,14 @@ namespace OrderService.Services
             };
 
             //Publish event to RabbitMQ
-            await _publishEndpoint.Publish(executedEvent);
+            try
+            {
+                await _publishEndpoint.Publish(executedEvent);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Failed to publish event to RabbitMQ.", ex);
+            }
 
             return executedEvent;
         }

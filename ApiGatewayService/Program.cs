@@ -22,11 +22,9 @@ if (app.Environment.IsDevelopment())
 //app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("http://localhost:5000/swagger/orders/v1/swagger.json", "Order Service v1");
-    c.SwaggerEndpoint("http://localhost:5000/swagger/portfolio/v1/swagger.json", "Portfolio Service v1");
-    c.SwaggerEndpoint("http://localhost:5000/swagger/prices/v1/swagger.json", "Price Service v1");
-
-    // UI available at http://localhost:5000/swagger
+    c.SwaggerEndpoint("/swagger/orders/swagger.json", "Order Service");
+    c.SwaggerEndpoint("/swagger/portfolio/swagger.json", "Portfolio Service");
+    c.SwaggerEndpoint("/swagger/prices/swagger.json", "Price Service");
     c.RoutePrefix = "swagger";
 });
 

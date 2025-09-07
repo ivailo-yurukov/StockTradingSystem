@@ -15,8 +15,9 @@ namespace OrderService.Services
         public Task Consume(ConsumeContext<PriceUpdatedEvent> context)
         {
             var msg = context.Message;
-            _priceCache.UpdatePrice(msg.Ticker, msg.Price);
-            Console.WriteLine($"[OrderService] Updated price for {msg.Ticker}: {msg.Price}");
+            var ticker = (msg.Ticker ?? string.Empty).Trim().ToUpperInvariant();
+            _priceCache.UpdatePrice(ticker, msg.Price);
+            Console.WriteLine($"[OrderService] Consumer received {ticker} => {msg.Price}");
             return Task.CompletedTask;
         }
     }

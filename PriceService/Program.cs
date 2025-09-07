@@ -1,4 +1,5 @@
 using MassTransit;
+using PriceService.Events;
 using PriceService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,11 @@ builder.Services.AddMassTransit(x =>
         {
             h.Username("guest");
             h.Password("guest");
+        });
+
+        cfg.Message<PriceUpdatedEvent>(m =>
+        {
+            m.SetEntityName("price-updated");
         });
     });
 });

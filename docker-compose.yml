@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: ordersdb
     ports:
-      - "5433:5432"   # host:container
+      - "5433:5432"
     volumes:
       - postgres_order_data:/var/lib/postgresql/data
 
@@ -21,7 +21,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: portfoliodb
     ports:
-      - "5434:5432"   # host:container
+      - "5434:5432"
     volumes:
       - postgres_portfolio_data:/var/lib/postgresql/data
 
@@ -30,63 +30,76 @@ services:
     image: rabbitmq:3-management
     container_name: rabbitmq
     ports:
-      - "5672:5672"   # broker port
-      - "15672:15672" # management UI
+      - "5672:5672"
+      - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # === OrderService ===
   order-service:
     build: ./OrderService
     container_name: order-service
     depends_on:
-      - postgres-order
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+      postgres-order:
+        condition: service_started
     environment:
       ConnectionStrings__Default: "Host=postgres-order;Port=5432;Database=ordersdb;Username=postgres;Password=postgres"
       RabbitMQ__Host: "rabbitmq"
       ASPNETCORE_URLS: "http://+:80"
     ports:
-      - "5001:80"   # http://localhost:5001
+      - "5001:80"
 
   # === PortfolioService ===
   portfolio-service:
     build: ./PortfolioService
     container_name: portfolio-service
     depends_on:
-      - postgres-portfolio
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+      postgres-portfolio:
+        condition: service_started
     environment:
       ConnectionStrings__Default: "Host=postgres-portfolio;Port=5432;Database=portfoliodb;Username=postgres;Password=postgres"
       RabbitMQ__Host: "rabbitmq"
       ASPNETCORE_URLS: "http://+:80"
     ports:
-      - "5002:80"   # http://localhost:5002
+      - "5002:80"
 
   # === PriceService ===
   price-service:
     build: ./PriceService
     container_name: price-service
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     environment:
       RabbitMQ__Host: "rabbitmq"
       ASPNETCORE_URLS: "http://+:80"
     ports:
-      - "5003:80"   # http://localhost:5003
+      - "5003:80"
 
   # === API Gateway ===
   api-gateway-service:
-    build: ./ApiGatewayService   # path to your ApiGatewayService project
+    build: ./ApiGatewayService
     container_name: api-gateway-service
     depends_on:
-      - order-service
-      - portfolio-service
-      - price-service
+      order-service:
+        condition: service_started
+      portfolio-service:
+        condition: service_started
+      price-service:
+        condition: service_started
     environment:
       ASPNETCORE_URLS: "http://+:80"
     ports:
-      - "5000:80"   # Gateway exposed on http://localhost:5000
+      - "5000:80"
 
 volumes:
   postgres_order_data:

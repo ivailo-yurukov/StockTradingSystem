@@ -30,6 +30,16 @@ builder.Services.AddMassTransit(x =>
             h.Password("guest");
         });
 
+        cfg.Message<OrderService.Events.PriceUpdatedEvent>(m =>
+        {
+            m.SetEntityName("price-updated");
+        });
+
+        cfg.Message<OrderService.Events.OrderExecutedEvent>(m =>
+        {
+            m.SetEntityName("order-executed");
+        });
+
         cfg.ReceiveEndpoint("order-service", e =>
         {
             e.ConfigureConsumer<PriceUpdatedConsumer>(context);

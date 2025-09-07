@@ -1,6 +1,7 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using PortfolioService.Data;
+using PortfolioService.Events;
 using PortfolioService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +27,9 @@ builder.Services.AddMassTransit(x =>
             h.Username("guest");
             h.Password("guest");
         });
+
+        cfg.Message<OrderExecutedEvent>(m => m.SetEntityName("order-executed"));
+        cfg.Message<PriceUpdatedEvent>(m => m.SetEntityName("price-updated"));
 
         cfg.ReceiveEndpoint("portfolio-service", e =>
         {

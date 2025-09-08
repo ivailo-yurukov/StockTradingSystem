@@ -4,13 +4,14 @@ using OrderService.Data;
 using OrderService.Interfaces;
 using OrderService.Middleware;
 using OrderService.Services;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<OrderDbContext>(options =>
@@ -18,6 +19,22 @@ builder.Services.AddDbContext<OrderDbContext>(options =>
 
 builder.Services.AddScoped<IOrderProcessor, OrderProcessor>();
 builder.Services.AddSingleton<PriceCache>();
+
+
+//builder.Services.addo.AddOpenTelemetryTracing(b =>
+//{
+//    b.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("OrderService"))
+//     .AddAspNetCoreInstrumentation()
+//     .AddHttpClientInstrumentation()
+//     // .AddSqlClientInstrumentation() // enable if needed
+//     // Configure exporter (Jaeger, OTLP, Zipkin)
+//     .AddJaegerExporter(options =>
+//     {
+//         options.AgentHost = builder.Configuration["Jaeger:Host"] ?? "localhost";
+//         options.AgentPort = int.Parse(builder.Configuration["Jaeger:Port"] ?? "6831");
+//     });
+//});
+
 builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<PriceUpdatedConsumer>();
@@ -48,9 +65,11 @@ builder.Services.AddMassTransit(x =>
 });
 
 builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 
-app.UseGlobalExceptionHandling();
+app.UseRequestTracing();           // add tracing middleware early
+//app.UseGlobalExceptionHandling();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -68,9 +87,6 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

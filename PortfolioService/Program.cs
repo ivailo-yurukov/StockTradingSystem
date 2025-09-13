@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PortfolioService.Data;
 using PortfolioService.Events;
 using PortfolioService.Services;
+using Contracts.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,8 +29,9 @@ builder.Services.AddMassTransit(x =>
             h.Password("guest");
         });
 
-        cfg.Message<OrderExecutedEvent>(m => m.SetEntityName("order-executed"));
-        cfg.Message<PriceUpdatedEvent>(m => m.SetEntityName("price-updated"));
+        // map to shared contract interfaces
+        cfg.Message<IOrderExecutedEvent>(m => m.SetEntityName("order-executed"));
+        cfg.Message<IPriceUpdatedEvent>(m => m.SetEntityName("price-updated"));
 
         cfg.ReceiveEndpoint("portfolio-service", e =>
         {

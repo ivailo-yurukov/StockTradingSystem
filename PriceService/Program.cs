@@ -1,6 +1,7 @@
 using MassTransit;
 using PriceService.Events;
 using PriceService.Services;
+using Contracts.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +22,8 @@ builder.Services.AddMassTransit(x =>
             h.Password("guest");
         });
 
-        cfg.Message<PriceUpdatedEvent>(m =>
+        // map to shared contract
+        cfg.Message<IPriceUpdatedEvent>(m =>
         {
             m.SetEntityName("price-updated");
         });

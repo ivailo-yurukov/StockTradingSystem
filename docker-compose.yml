@@ -42,7 +42,9 @@ services:
 
   # === OrderService ===
   order-service:
-    build: ./OrderService
+    build:
+      context: .
+      dockerfile: OrderService/Dockerfile
     container_name: order-service
     depends_on:
       rabbitmq:
@@ -58,7 +60,9 @@ services:
 
   # === PortfolioService ===
   portfolio-service:
-    build: ./PortfolioService
+    build:
+      context: .
+      dockerfile: PortfolioService/Dockerfile
     container_name: portfolio-service
     depends_on:
       rabbitmq:
@@ -74,7 +78,9 @@ services:
 
   # === PriceService ===
   price-service:
-    build: ./PriceService
+    build:
+      context: .
+      dockerfile: PriceService/Dockerfile
     container_name: price-service
     depends_on:
       rabbitmq:
@@ -87,7 +93,9 @@ services:
 
   # === API Gateway ===
   api-gateway-service:
-    build: ./ApiGatewayService
+    build:
+      context: .
+      dockerfile: ApiGatewayService/Dockerfile
     container_name: api-gateway-service
     depends_on:
       order-service:

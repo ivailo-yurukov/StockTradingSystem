@@ -3,6 +3,7 @@ using OrderService.Data;
 using OrderService.Events;
 using OrderService.Interfaces;
 using OrderService.Models;
+using Contracts.Events;
 
 namespace OrderService.Services
 {
@@ -34,7 +35,6 @@ namespace OrderService.Services
 
             await _dbContext.SaveChangesAsync();
 
-            // Create event
             var executedEvent = new OrderExecutedEvent
             {
                 UserId = order.UserId,
@@ -45,10 +45,18 @@ namespace OrderService.Services
                 ExecutedAt = order.CreatedAt
             };
 
-            //Publish event to RabbitMQ
+            // Publish using the shared contract interface
             try
             {
-                await _publishEndpoint.Publish(executedEvent);
+                await _publishEndpoint.Publish<IOrderExecutedEvent>(new
+                {
+                    UserId = executedEvent.UserId,
+                    Ticker = executedEvent.Ticker,
+                    Quantity = executedEvent.Quantity,
+                    Side = executedEvent.Side,
+                    Price = executedEvent.Price,
+                    ExecutedAt = executedEvent.ExecutedAt
+                });
             }
             catch (Exception ex)
             {

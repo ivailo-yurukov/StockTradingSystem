@@ -16,6 +16,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PriceService", "PriceServic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiGatewayService", "ApiGatewayService\ApiGatewayService.csproj", "{C502F098-4C3F-41C4-9EED-1145E781BCAE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts", "Contracts\Contracts.csproj", "{5DD8EC8A-80B5-49B6-8707-A19315BB0313}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +40,10 @@ Global
 		{C502F098-4C3F-41C4-9EED-1145E781BCAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C502F098-4C3F-41C4-9EED-1145E781BCAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C502F098-4C3F-41C4-9EED-1145E781BCAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DD8EC8A-80B5-49B6-8707-A19315BB0313}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DD8EC8A-80B5-49B6-8707-A19315BB0313}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DD8EC8A-80B5-49B6-8707-A19315BB0313}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DD8EC8A-80B5-49B6-8707-A19315BB0313}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

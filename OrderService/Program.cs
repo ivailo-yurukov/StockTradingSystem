@@ -4,6 +4,7 @@ using OrderService.Data;
 using OrderService.Interfaces;
 using OrderService.Middleware;
 using OrderService.Services;
+using Contracts.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,12 +31,13 @@ builder.Services.AddMassTransit(x =>
             h.Password("guest");
         });
 
-        cfg.Message<OrderService.Events.PriceUpdatedEvent>(m =>
+        // use shared contract interface names for entity routing
+        cfg.Message<IPriceUpdatedEvent>(m =>
         {
             m.SetEntityName("price-updated");
         });
 
-        cfg.Message<OrderService.Events.OrderExecutedEvent>(m =>
+        cfg.Message<IOrderExecutedEvent>(m =>
         {
             m.SetEntityName("order-executed");
         });

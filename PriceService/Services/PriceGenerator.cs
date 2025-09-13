@@ -1,5 +1,5 @@
 ﻿using MassTransit;
-using PriceService.Events;
+using Contracts.Events;
 
 namespace PriceService.Services
 {
@@ -22,18 +22,21 @@ namespace PriceService.Services
                 {
                     var price = (decimal)(_random.NextDouble() * 1000 + 50); // random price between 50–1050
 
-                    var priceUpdate = new PriceUpdatedEvent
+                    var roundedPrice = Math.Round(price, 2);
+                    var timestamp = DateTime.UtcNow;
+
+                    // publish using the shared contract interface (anonymous object)
+                    await _publishEndpoint.Publish<IPriceUpdatedEvent>(new
                     {
                         Ticker = ticker,
-                        Price = Math.Round(price, 2),
-                        Timestamp = DateTime.UtcNow
-                    };
+                        Price = roundedPrice,
+                        Timestamp = timestamp
+                    }, stoppingToken);
 
-                    await _publishEndpoint.Publish(priceUpdate, stoppingToken);
-                    Console.WriteLine($"[PriceService] Published {ticker} at {priceUpdate.Price}");
+                    Console.WriteLine($"[PriceService] Published {ticker} at {roundedPrice}");
                 }
 
-                await Task.Delay(10000, stoppingToken); 
+                await Task.Delay(10000, stoppingToken);
             }
         }
     }

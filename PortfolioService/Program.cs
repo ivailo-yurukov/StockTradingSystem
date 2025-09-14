@@ -3,18 +3,53 @@ using Microsoft.EntityFrameworkCore;
 using PortfolioService.Data;
 using PortfolioService.Events;
 using PortfolioService.Services;
+using PortfolioService.Middleware;
 using Contracts.Events;
+using Serilog;
+using Serilog.Events;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Resources;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Serilog configuration (enrichments added via middleware/log scopes)
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .CreateLogger();
 
+builder.Host.UseSerilog();
+
+// Add services to the container.
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<PortfolioDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+
+// OpenTelemetry tracing - configure exporters and instrumentation
+var serviceName = "PortfolioService";
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracingBuilder =>
+    {
+        tracingBuilder
+            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            // Register ActivitySources used by consumers to create spans
+            .AddSource("PortfolioService.OrderExecutedConsumer", "PortfolioService.PriceUpdatedConsumer");
+            //.AddJaegerExporter(options =>
+            //{
+            //    options.AgentHost = builder.Configuration["Jaeger:Host"] ?? "localhost";
+            //    options.AgentPort = int.TryParse(builder.Configuration["Jaeger:Port"], out var p) ? p : 6831;
+            //})
+            //.AddZipkinExporter(options =>
+            //{
+            //    options.Endpoint = new Uri(builder.Configuration["Zipkin:Endpoint"] ?? "http://localhost:9411/api/v2/spans");
+            //});
+    });
 
 builder.Services.AddMassTransit(x =>
 {
@@ -40,9 +75,12 @@ builder.Services.AddMassTransit(x =>
         });
     });
 });
+
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.UseMiddleware<CorrelationIdMiddleware>();
 
 // Auto apply migrations
 using (var scope = app.Services.CreateScope())

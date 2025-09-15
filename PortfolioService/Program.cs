@@ -12,12 +12,12 @@ using OpenTelemetry.Resources;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Serilog configuration (enrichments added via middleware/log scopes)
+// Serilog configuration
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
     .Enrich.FromLogContext()
-    .WriteTo.Console()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} CorrelationId={CorrelationId} TraceId={TraceId} {Properties}{NewLine}{Exception}")
     .CreateLogger();
 
 builder.Host.UseSerilog();
